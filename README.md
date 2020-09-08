@@ -20,3 +20,19 @@ The most common and easiest way to use authentication middleware for Node.js is 
     ```javascript
     app.get('/', (req, res) => res.render('index'));
     ```
+
+### Using a template Engine's Power
+The power of using a template engine is, it allows us to pass variables from the server to the template file.
+- In the template file, we can access the variables by using one of these 2 syntaxes
+    `#{variable_name}` or `p= variable_name`
+
+- We can pass variables to the template file in from the server as follows
+    ```javascript
+    app.get('/', (req, res) => {
+        res.render('index', {
+            title: 'Advanced node and express',
+            message: 'please login'
+        })
+    })
+    ```
+
