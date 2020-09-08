@@ -1,0 +1,21 @@
+{
+  "name": "advanced-node-and-express",
+  "version": "1.0.0",
+  "description": "Utilizing web apps with node and express in advance",
+  "main": "app.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "express",
+    "node",
+    "pug",
+    "passport"
+  ],
+  "author": "Darbaz Ali",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "pug": "^3.0.0"
+  }
+}
