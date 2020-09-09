@@ -3,6 +3,9 @@ const passport = require('passport');
 const session = require('express-session');
 require('dotenv').config();
 
+const db = require('mongodb');
+
+
 const app = epxress();
 
 app.listen(3000, () => console.log("Listenting on 3000"))
@@ -18,6 +21,17 @@ app.use(session({
 // init passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+})
+
+passport.deserializeUser((id, done) => {
+    db.collection('users')
+        .findOne({_id: new db.ObjectID(id)}, (err, doc) => {
+            done(null, doc);
+        })
+})
 
 
 app.set('view engine', 'pug');
