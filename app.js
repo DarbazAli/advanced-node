@@ -11,7 +11,7 @@ const app = epxress();
 app.listen(3000, () => console.log("Listenting on 3000"))
 
 
-
+// setup session middleware
 app.use(session({
     secret: process.env.SESSION_SECRET, 
     resave: true,
