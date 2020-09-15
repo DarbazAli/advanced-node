@@ -64,7 +64,7 @@ DATABASE( async client => {
     =======================================================*/
     app
         .route('/profile')
-        .get((req, res) => res.render('profile'))
+        .get(ensureAuthenticated, (req, res) => res.render('profile'))
 
     app
         .route('/login')
@@ -112,5 +112,14 @@ DATABASE( async client => {
             })
         })
 })
+
+
+/*======================================================
+        8) CREATE AUTHENTICATION MIDDLEWARE
+=======================================================*/
+function ensureAuthenticated( req, res, next ) {
+    if ( req.isAuthenticated() ) return next();
+    return res.redirect('/');
+}
 
 app.listen(PORT, log(`Server running on port ${PORT}`))
