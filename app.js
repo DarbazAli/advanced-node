@@ -8,6 +8,7 @@ const passport = require('passport');
 const session = require('express-session');
 const ObjectID = require('mongodb').ObjectID;
 const DATABASE = require('./connection');
+const LocalStrategy = require('passport-local').Strategy;
 
 require('dotenv').config();
 
@@ -39,13 +40,6 @@ app.set('views', 'views');
 
 
 
-/*======================================================
-    2) USE TEMPLATE'S POWER
-=======================================================*/
-app.set('view engine', 'pug');
-app.set('views', 'views');
-
-
 
 /*======================================================
    5) IMPLEMENTING SERIALIZATION
@@ -74,11 +68,26 @@ DATABASE( async client => {
 
     passport.deserializeUser((id, done) => {
         DB.findOne({ _id: new ObjectID(id) }, (err, doc) => {
-            done(null, null)
+            done(null, doc)
         })
     })
 
-}) .catch( e => {
+    /*======================================================
+    5) SETUP AUTHENTICATION STRATEGY
+    =======================================================*/
+    passport.use(new LocalStrategy( (username, password, done) => {
+        DB.findOne({username: username}, (err, user) => {
+            log(`User ${username} attempted to login`)
+            if ( err ) return done (err)
+            if (!user) return done(null, false)
+            if ( password !== password ) return done(null, false)
+            return done(null, user)
+        })
+    } ))
+
+}) 
+
+.catch( e => {
     app
         .route('/')
         .get((req, res) => {
