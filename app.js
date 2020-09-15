@@ -9,12 +9,14 @@ const session = require('express-session');
 const ObjectID = require('mongodb').ObjectID;
 const DATABASE = require('./connection');
 const LocalStrategy = require('passport-local').Strategy;
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
 const app = express();
 
-
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json());
 
 /*======================================================
     3) SETUP PASSPORT & SESSI0N
@@ -64,7 +66,7 @@ DATABASE( async client => {
     =======================================================*/
     app
         .route('/profile')
-        .get(ensureAuthenticated, (req, res) => res.render('profile'))
+        .get(ensureAuthenticated, (req, res) => res.render('profile', {username: req.user.username}))
 
     app
         .route('/login')
