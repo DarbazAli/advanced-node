@@ -54,9 +54,25 @@ DATABASE( async client => {
         .get((req, res) => {
             res.render('index', {
                 title: 'Connected to Database',
-                message: 'Please login'
+                message: 'Please login',
+                showLogin: true
             })
         })
+
+    /*======================================================
+        7) USE PASSPORT STRATEGY
+    =======================================================*/
+    app
+        .route('/profile')
+        .get((req, res) => res.render('profile'))
+
+    app
+        .route('/login')
+        .post(
+            passport.authenticate('local', {
+                failureRedirect: '/',
+                successRedirect: '/profile'
+            }))
 
 
     /*======================================================
@@ -73,7 +89,7 @@ DATABASE( async client => {
     })
 
     /*======================================================
-    5) SETUP AUTHENTICATION STRATEGY
+    6) SETUP AUTHENTICATION STRATEGY
     =======================================================*/
     passport.use(new LocalStrategy( (username, password, done) => {
         DB.findOne({username: username}, (err, user) => {
