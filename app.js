@@ -52,7 +52,7 @@ app.set('views', 'views');
 =======================================================*/
 DATABASE( async client => {
     const DB = await client
-        .db('database')
+        .db('test')
         .collection('passport_users');
 
     app
