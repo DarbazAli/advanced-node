@@ -6,6 +6,8 @@ const PORT = process.env.PORT || 3000
 const express = require('express');
 const passport = require('passport');
 const session = require('express-session');
+const { Db } = require('mongodb');
+const ObjectID = require('mongodb').ObjectID;
 
 const app = express();
 
@@ -24,6 +26,20 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+/*======================================================
+    4) SERIALIZE USER OBJECT
+=======================================================*/
+passport.serializeUser((user, done) => {
+    done(null, user._id);
+})
+
+passport.deserializeUser((id, done) => {
+    // Db.findOne({ _id: new ObjectID(id) }, (err, doc) => {
+    //     done(null, null)
+    // })
+})
 
 /*======================================================
     1) SETUP TEMPLATE ENGINE
