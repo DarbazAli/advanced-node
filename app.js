@@ -79,12 +79,12 @@ DATABASE(async (client) => {
       },
       passport.authenticate(
         "local",
-        { failureRedirect: "/" },
+        { failureRedirect: "/" }),
         (req, res, next) => {
           res.redirect("/profile");
         }
       )
-    );
+    
   });
 
   /*======================================================
