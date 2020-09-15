@@ -19,7 +19,11 @@ app.set('views', 'views');
 
 
 
-
+/*======================================================
+    2) USE TEMPLATE'S POWER
+=======================================================*/
+app.set('view engine', 'pug');
+app.set('views', 'views');
 app
     .route('/')
-    .get((req, res) => res.render('index'))
+    .get((req, res) => res.render('index', {title: 'HOME', message: 'Please login'}))
