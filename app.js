@@ -10,6 +10,7 @@ const ObjectID = require("mongodb").ObjectID;
 const DATABASE = require("./connection");
 const LocalStrategy = require("passport-local").Strategy;
 const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt');
 
 require("dotenv").config();
 
@@ -88,14 +89,15 @@ DATABASE(async (client) => {
     app
     .route('/register')
     .post( (req, res, next ) => {
-      
+      const hash = bcrypt.hashSync(req.body.password, 12);
+
       DB.findOne({username: req.body.username}, (err, user) => {
         if ( err ) next(err)
         else if ( user ) { res.redirect('/')}
         else {
           DB.insertOne( {
             username: req.body.username,
-            password: req.body.password
+            password: hash
           }, (err, doc) => {
             if (err) {res.redirect('/')}
             else {
@@ -138,7 +140,7 @@ DATABASE(async (client) => {
         log(`User ${username} attempted to login`);
         if (err) return done(err);
         if (!user) return done(null, false);
-        if (password !== password) return done(null, false);
+        if (!bcrypt.compareSync(password, user.password)) return done(null, false);
         return done(null, user);
       });
     })
