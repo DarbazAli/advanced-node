@@ -52,11 +52,16 @@ app.set("views", "views");
 =======================================================*/
 DATABASE(async (client) => {
   const DB = await client.db("test").collection("passport_users");
-  io.on('connection', socket => {
-    console.log('A user has connected')
-  })
+  
   routes(app, DB)
   auth(app, DB)
+
+  let currentUsers = 0;
+  io.on('connection', socket => {
+    ++currentUsers
+    io.emit('user count', currentUsers)
+    console.log('A user has connected')
+  })
 
 }).catch((e) => {
   app.route("/").get((req, res) => {

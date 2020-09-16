@@ -45,7 +45,7 @@ module.exports = function(app, DB) {
       },
       function (accessToken, refreshToken, profile, cb) {
         console.log(profile);
-        DB.findAndModify(
+        DB.findOneAndUpdate(
           { id: profile.id },
           {},
           {
