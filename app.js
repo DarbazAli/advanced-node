@@ -6,12 +6,13 @@ const PORT = process.env.PORT || 3000;
 const express = require("express");
 const passport = require("passport");
 const session = require("express-session");
-const ObjectID = require("mongodb").ObjectID;
+// const ObjectID = require("mongodb").ObjectID;
 const DATABASE = require("./connection");
-const LocalStrategy = require("passport-local").Strategy;
+// const LocalStrategy = require("passport-local").Strategy;
 const bodyParser = require("body-parser");
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const routes = require('./routes.js');
+const auth = require('./auth.js');
 
 require("dotenv").config();
 
@@ -46,37 +47,10 @@ app.set("views", "views");
 =======================================================*/
 DATABASE(async (client) => {
   const DB = await client.db("test").collection("passport_users");
+
   routes(app, DB)
+  auth(app, DB)
 
-  
-
-  /*======================================================
-    4) SERIALIZE USER OBJECT
-    =======================================================*/
-  passport.serializeUser((user, done) => {
-    done(null, user._id);
-  });
-
-  passport.deserializeUser((id, done) => {
-    DB.findOne({ _id: new ObjectID(id) }, (err, doc) => {
-      done(null, doc);
-    });
-  });
-
-  /*======================================================
-    6) SETUP AUTHENTICATION STRATEGY
-    =======================================================*/
-  passport.use(
-    new LocalStrategy((username, password, done) => {
-      DB.findOne({ username: username }, (err, user) => {
-        log(`User ${username} attempted to login`);
-        if (err) return done(err);
-        if (!user) return done(null, false);
-        if (!bcrypt.compareSync(password, user.password)) return done(null, false);
-        return done(null, user);
-      });
-    })
-  );
 }).catch((e) => {
   app.route("/").get((req, res) => {
     res.render("index", {
