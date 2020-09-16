@@ -18,6 +18,11 @@ require("dotenv").config();
 
 const app = express();
 
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+
+
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -47,7 +52,9 @@ app.set("views", "views");
 =======================================================*/
 DATABASE(async (client) => {
   const DB = await client.db("test").collection("passport_users");
-
+  io.on('connection', socket => {
+    console.log('A user has connected')
+  })
   routes(app, DB)
   auth(app, DB)
 
@@ -62,4 +69,4 @@ DATABASE(async (client) => {
 
 
 
-app.listen(PORT, log(`Server running on port ${PORT}`));
+http.listen(PORT, log(`Server running on port ${PORT}`));
