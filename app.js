@@ -54,38 +54,7 @@ DATABASE(async (client) => {
     });
   });
 
-  /*======================================================
-        10) REGISTER NEW USERS
-    =======================================================*/
-  app.route("/register").post((req, res, next) => {
-    const { username, password } = req.body;
-    DB.findOne(
-      { username: username },
-      (err, user) => {
-        if (err) next(err);
-        else if (user) res.redirect("/");
-        else {
-          DB.insertOne(
-            {
-              username: username,
-              password: password,
-            },
-            (err, doc) => {
-              if (err) res.redirect("/");
-              next(null, doc.ops[0]);
-            }
-          );
-        }
-      },
-      passport.authenticate(
-        "local",
-        { failureRedirect: "/" }),
-        (req, res, next) => {
-          res.redirect("/profile");
-        }
-      )
-    
-  });
+  
 
   /*======================================================
         7) USE PASSPORT STRATEGY
@@ -96,12 +65,14 @@ DATABASE(async (client) => {
       res.render("profile", { username: req.user.username })
     );
 
-  app.route("/login").post(
-    passport.authenticate("local", {
-      failureRedirect: "/",
-      successRedirect: "/profile",
-    })
-  );
+    app
+    .route('/login')
+    .post(
+        passport.authenticate('local', {
+            failureRedirect: '/'
+        }), (req, res) => {
+          res.redirect('/profile')
+        })
 
   /*======================================================
         9) LOGOUT USER
@@ -110,6 +81,33 @@ DATABASE(async (client) => {
     req.logout();
     res.redirect("/");
   });
+
+  /*======================================================
+        10) REGISTER NEW USERS
+    =======================================================*/
+    app
+    .route('/register')
+    .post( (req, res, next ) => {
+      
+      DB.findOne({username: req.body.username}, (err, user) => {
+        if ( err ) next(err)
+        else if ( user ) { res.redirect('/')}
+        else {
+          DB.insertOne( {
+            username: req.body.username,
+            password: req.body.password
+          }, (err, doc) => {
+            if (err) {res.redirect('/')}
+            else {
+              next(null, doc.ops[0])
+            }
+          })
+        }
+      })
+    }, 
+      passport.authenticate('local', {failureRedirect: '/'}), (req, res, next) => {
+        return res.redirect('/profile')
+    })
 
   /*======================================================
         HANDLE MISSING PAGES
