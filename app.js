@@ -20,6 +20,11 @@ const app = express();
 
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
+const passportSocketIo = require('passport.socketio');
+const MongoStore = require('connect-mongo')(session);
+const cookieParser = require('cookie-parser');
+const URI = process.env.MONGO_URI;
+const store = new MongoStore({url: URI})
 
 
 app.use(express.static(__dirname + '/public'));
@@ -29,17 +34,28 @@ app.use(bodyParser.json());
 /*======================================================
     3) SETUP PASSPORT & SESSI0N
 =======================================================*/
-app.use(
-  session({
-    secret: "secret",
-    resave: true,
-    saveUninitialized: true,
-    cookie: { secure: false },
-  })
-);
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: true,
+  saveUninitialized: true,
+  cookie: { secure: false },
+  key: 'express.sid',
+  store: store
+}));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+io.use(
+  passportSocketIo.authorize({
+    cookieParser: cookieParser,
+    key: 'express.sid',
+    secret: process.env.SESSION_SECRET,
+    store: store,
+    success: onAuthorizeSuccess,
+    fail: onAuthorizeFail
+  })
+)
 
 /*======================================================
     1) SETUP TEMPLATE ENGINE
@@ -57,10 +73,29 @@ DATABASE(async (client) => {
   auth(app, DB)
 
   let currentUsers = 0;
+
   io.on('connection', socket => {
     ++currentUsers
-    io.emit('user count', currentUsers)
-    console.log('A user has connected')
+    io.emit('user', {
+      name: socket.request.user.name,
+      currentUsers,
+      connected: true
+    })
+    console.log(`user ${socket.request.user.username} connected`)
+
+    socket.on('chat message', (message) => {
+      io.emit('chat message', { name: socket.request.user.name, message });
+    });
+
+    socket.on('disconnect', () => {
+      --currentUsers;
+      io.emit('user', {
+        name: socket.request.user.name,
+        currentUsers,
+        connected: false
+      })
+      console.log(`user ${socket.request.user.username} disconnected`)
+    })
   })
 
 }).catch((e) => {
@@ -72,6 +107,17 @@ DATABASE(async (client) => {
   });
 });
 
+
+function onAuthorizeSuccess(data, accept) {
+  console.log('successful connection to socket.io')
+  accept(null, true)
+}
+
+function onAuthorizeFail(data, message, error, accept) {
+  if (error) throw new Error(message);
+  console.log('failed connection to socket.io: ', message);
+  accept(null, false)
+}
 
 
 http.listen(PORT, log(`Server running on port ${PORT}`));
